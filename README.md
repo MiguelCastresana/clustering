@@ -4,7 +4,7 @@ This repository contains scripts for clustering genes based on functional pathwa
 
 ## Overview
 
-The scripts provided here are designed to cluster genes into functional modules using different clustering methods. These methods are applied to pathway data to identify groups of genes that may share functional relationships. The clustering results can be used for further analysis, such as identifying key pathways involved in biological processes.
+The scripts provided here are designed to generate the data for the benchmark and to cluster genes into functional modules using different clustering methods. These methods are applied to pathway data to identify groups of genes that may share functional relationships. The clustering results can be used for further analysis, such as identifying key pathways involved in biological processes.
 
 For a detailed explanation of the advantages of clustering for pathway enrichment analysis tools, check this paper: [Clustered pathway enrichment analysis](https://www.frontiersin.org/journals/genetics/articles/10.3389/fgene.2022.855766/full).
 
