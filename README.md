@@ -47,6 +47,5 @@ This script performs the clustering of the input genesets with MGclus, MCL, and 
 
 
 
-
-**Contact**
-Miguel Castresana Aguirre (miguel.castresana.aguirre@ki.se)
+**Contact**:  
+Miguel Castresana Aguirre ([miguel.castresana.aguirre@ki.se](mailto:miguel.castresana.aguirre@ki.se))
