@@ -12,7 +12,7 @@ The method was implemented in the R package ANUBIX under the function anubix_clu
 
 ## Repository Contents
 
-This repository provides scripts for the following clustering methods:
+This repository provides a script to run the following clustering methods:
 
 - **MGclus**: A method for clustering employing shared neighbors
 - **MCL (Markov Cluster Algorithm)**: A popular algorithm for clustering data based on flow simulations.
@@ -49,3 +49,8 @@ This script performs the clustering of the input genesets with MGclus, MCL, and 
 
 **Contact**:  
 Miguel Castresana Aguirre ([miguel.castresana.aguirre@ki.se](mailto:miguel.castresana.aguirre@ki.se))
+
+**References:**
+- **MGclus**: Frings, O., Alexeyenko, A., and Sonnhammer, E. L. L. (2013). MGclus: Network Clustering Employing Shared Neighbors. Mol. Biosyst. 9, 1670–1675. doi:10.1039/c3mb25473a
+- **MCL (Markov Cluster Algorithm)**: Van Dongen, S. (2008). Graph Clustering via a Discrete Uncoupling Process. SIAM J. Matrix Anal. Appl. 30, 121–141. doi:10.1137/040608635
+- **Infomap**: Rosvall, M., and Bergstrom, C. T. (2008). Maps of Random Walks on Complex Networks Reveal Community Structure. Proc. Natl. Acad. Sci. U.S.A. 105, 1118–1123. doi:10.1073/pnas.0706851105
