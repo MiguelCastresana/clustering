@@ -2,13 +2,13 @@
 
 Gene sets derived from experiments are often heterogeneous, meaning that they represent multiple pathways, see visual example:
 <p align="center">
-  <img src="Figure1.png" width="400">
+  <img src="Figure.png" width="400">
 </p>
 
 A way to counteract this is to cluster the gene set into more homogenous parts before performing pathway analysis on each module. We explored whether network-based pre-clustering of a query gene set can improve pathway analysis:
 
 <p align="center">
-  <img src="Figure.png" width="400">
+  <img src="Figure1.png" width="400">
 </p>
 
 
@@ -26,7 +26,7 @@ Additionally it is also implemented in our Web-tool [PathBIX](https://pathbix.sb
 
 ## Repository Contents
 
-This repository provides a script to run the following clustering methods:
+This repository provides scripts for the following clustering methods:
 
 - **MGclus**: A method for clustering employing shared neighbors
 - **MCL (Markov Cluster Algorithm)**: A popular algorithm for clustering data based on flow simulations.
@@ -69,10 +69,6 @@ The following R packages are required to run the scripts:
 
 
 
-**Contact**:  
-Miguel Castresana Aguirre ([miguel.castresana.aguirre@ki.se](mailto:miguel.castresana.aguirre@ki.se))
 
-**References:**
-- **MGclus**: Frings, O., Alexeyenko, A., and Sonnhammer, E. L. L. (2013). MGclus: Network Clustering Employing Shared Neighbors. Mol. Biosyst. 9, 1670–1675. doi:10.1039/c3mb25473a
-- **MCL (Markov Cluster Algorithm)**: Van Dongen, S. (2008). Graph Clustering via a Discrete Uncoupling Process. SIAM J. Matrix Anal. Appl. 30, 121–141. doi:10.1137/040608635
-- **Infomap**: Rosvall, M., and Bergstrom, C. T. (2008). Maps of Random Walks on Complex Networks Reveal Community Structure. Proc. Natl. Acad. Sci. U.S.A. 105, 1118–1123. doi:10.1073/pnas.0706851105
+**Contact**
+Miguel Castresana Aguirre (miguel.castresana.aguirre@ki.se)
