@@ -1,6 +1,18 @@
 # Clustered pathway enrichment analysis
 
-This repository contains scripts for clustering genes based on functional pathway data using various algorithms, including MGclus, MCL, and Infomap.
+Gene sets derived from experiments are often heterogeneous, meaning that they represent multiple pathways, see visual example:
+<p align="center">
+  <img src="Figure1.png" width="400">
+</p>
+
+A way to counteract this is to cluster the gene set into more homogenous parts before performing pathway analysis on each module. We explored whether network-based pre-clustering of a query gene set can improve pathway analysis:
+
+<p align="center">
+  <img src="Figure.png" width="400">
+</p>
+
+
+The methods MCL, Infomap, and MGclus were used to cluster the gene set projected onto the FunCoup network. We characterized how well these methods are able to detect individual pathways in multi-pathway gene sets, and applied each of the clustering methods in combination with four pathway analysis methods: Gene Enrichment Analysis, BinoX, NEAT, and ANUBIX.
 
 ## Overview
 
@@ -31,19 +43,27 @@ The following R packages are required to run the scripts:
 
 - A functional association network is required. For instance, FunCoup human network, download [here](https://funcoup.org/downloads/download.action?type=network&instanceID=24480085&fileName=FC5.0_H.sapiens_compact.gz)
 
-### 1. `data_generation_clustering.R`
+## Scripts Overview
 
-**Purpose:**  
-This script is responsible for generating data used for the clustering benchmark. It includes functions to load and process KEGG pathway database data and to filter network data.
+### R Scripts:
 
+**Data preparation:**
 
-### 2. `clustering.R`
+1. **bisected_path_Creation.R**: Bisects pathways keeping an expected overlap. We do this to create our own sets of ground truth gene sets.
 
-**Purpose:**  
-This script performs the clustering of the input genesets with MGclus, MCL, and Infomap.
+2. **set_creation.R**: Creates TP and FP gene sets.
 
-**Inputs:**  
-- `input_TP_genesets.RData`: This file contains the gene set data required for the analysis.
+3. **clustering_genesets.R**: Clusters gene sets using MGclus, MCL and Infomap
+
+4. **cluster_jaccard_comparison.R**: Benchmarking clustering methods for pathway recovery using Jaccard similarity between known pathways and predicted modules
+
+5. **Cluster_Degree_Analysis.R**: Compare network degree distributions between real and random gene sets to evaluate bias in false positives and clustering methods.
+
+6. **merge_FP_analysis.R**: Merge FP results
+
+7. **merge_TP_analysis.R**: Merge TP results
+
+8. **roc_curves.R**: Generate the ROC curves combining the clustering and non clustering results
 
 
 
