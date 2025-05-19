@@ -49,7 +49,7 @@ The following R packages are required to run the scripts:
 
 ### R Scripts:
 
-**Data preparation:**
+**Analysis:**
 
 1. **bisected_path_Creation.R**: Bisects pathways keeping an expected overlap. We do this to create our own sets of ground truth gene sets.
 
