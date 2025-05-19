@@ -22,6 +22,8 @@ For a detailed explanation of the advantages of clustering for pathway enrichmen
 
 The method was implemented in the R package ANUBIX under the function anubix_clustering, see the repository [here](https://github.com/MiguelCastresana/anubix) for more info.
 
+Additionally it is also implemented in our Web-tool [PathBIX](https://pathbix.sbc.su.se/).
+
 ## Repository Contents
 
 This repository provides a script to run the following clustering methods:
