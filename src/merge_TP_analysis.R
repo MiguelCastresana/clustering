@@ -1,6 +1,7 @@
 
 
 library(dplyr)
+source(file.path("src", "paths.R"))
 library(stringr)
 library(parallel)
 library(ANUBIX)
@@ -131,18 +132,18 @@ merge_results <- function(tp, binox = NULL, neat = NULL, gea = NULL) {
 }
 
 # --- 6. Main execution for TP (no clustering) ---
-network   <- load_network("/scratch/2020_clustering/fc4.1")
-pathways  <- load_pathways("/scratch/2020_clustering/KEGG_h_sapiens")
-genesets  <- load_genesets("/scratch/2020_clustering/TP/TP_genesets")
+network   <- load_network(Sys.getenv("CLUSTERING_NETWORK_FILE", unset = benchmark_file("fc4.1")))
+pathways  <- load_pathways(Sys.getenv("CLUSTERING_PATHWAYS_FILE", unset = benchmark_file("KEGG_h_sapiens")))
+genesets  <- load_genesets(Sys.getenv("CLUSTERING_TP_GENESETS_FILE", unset = input_file("TP_genesets")))
 
-tp_noclust <- run_anubix_tp(network, pathways, genesets)
-binox_nocl <- process_binox("/scratch/2020_clustering/benchmark/TP/binox_TP_nocluster")
-neat_nocl  <- process_neat("/scratch/2020_clustering/benchmark/TP/neat_TP_nocluster")
-gea_nocl   <- process_gea("/scratch/2020_clustering/benchmark/TP/gea_TP_nocluster")
+tp_noclust <- run_anubix_fp(network, pathways, genesets)
+binox_nocl <- process_binox(benchmark_file("benchmark", "TP", "binox_TP_nocluster"))
+neat_nocl  <- process_neat(benchmark_file("benchmark", "TP", "neat_TP_nocluster"))
+gea_nocl   <- process_gea(benchmark_file("benchmark", "TP", "gea_TP_nocluster"))
 
 merged_nocl <- merge_results(tp_noclust, binox_nocl, neat_nocl, gea_nocl)
 write.table(merged_nocl,
-            "/scratch/2020_clustering/FINAL/all_merge_TP_NOcluster.tsv",
+            benchmark_output("FINAL", "all_merge_TP_NOcluster.tsv"),
             sep = "\t", row.names = FALSE, quote = FALSE)
 
 # --- 7. Repeat for clustering methods ---
@@ -151,13 +152,13 @@ cluster_methods <- c(infomap = "infomap_tp",
                      mgclus  = "mgclus_tp")
 
 for (method in names(cluster_methods)) {
-  gs_path  <- file.path("/scratch/2020_clustering/benchmark/TP/", paste0(cluster_methods[[method]], ".tsv"))
+  gs_path  <- benchmark_file("benchmark", "TP", paste0(cluster_methods[[method]], ".tsv"))
   gs       <- load_genesets(gs_path)
-  tp_res   <- run_anubix_tp(network, pathways, gs)
-  bx       <- process_binox(sprintf("/scratch/2020_clustering/benchmark/TP/results/binox_%s.tsv",      method))
-  nt       <- process_neat(sprintf("/scratch/2020_clustering/benchmark/TP/results/neat_%s.tsv",        method))
-  ga       <- process_gea(sprintf("/scratch/2020_clustering/benchmark/TP/results/gea_%s.tsv",          method))
+  tp_res   <- run_anubix_fp(network, pathways, gs)
+  bx       <- process_binox(benchmark_file("benchmark", "TP", "results", sprintf("binox_%s.tsv", method)))
+  nt       <- process_neat(benchmark_file("benchmark", "TP", "results", sprintf("neat_%s.tsv", method)))
+  ga       <- process_gea(benchmark_file("benchmark", "TP", "results", sprintf("gea_%s.tsv", method)))
   merged   <- merge_results(tp_res, bx, nt, ga)
-  out_path <- sprintf("/scratch/2020_clustering/benchmark/TP/results/all_merge_TP_cluster_%s.tsv", method)
+  out_path <- benchmark_output("benchmark", "TP", "results", sprintf("all_merge_TP_cluster_%s.tsv", method))
   write.table(merged, out_path, sep = "\t", row.names = FALSE, quote = FALSE)
 }

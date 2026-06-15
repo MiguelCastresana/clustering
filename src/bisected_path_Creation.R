@@ -2,19 +2,24 @@
 # Benchmark overlap and split KEGG pathways on FunCoup network
 # Load libraries
 
+source(file.path("src", "paths.R"))
 library(dplyr)
 library(igraph)
 
 # --- 1. Load and filter network ---
-net <- read.delim("/scratch2/pathbix_website/FC5.0_H.sapiens_compact", header = TRUE)
+network_path <- Sys.getenv("CLUSTERING_FUNCOUP_FILE", unset = benchmark_file("FC5.0_H.sapiens_compact"))
+msigdb_path <- Sys.getenv("CLUSTERING_MSIGDB_FILE", unset = benchmark_file("msigdb", "msigdb_v7"))
+reactome_path <- Sys.getenv("CLUSTERING_REACTOME_FILE", unset = benchmark_file("REACTOME_h_sapiens"))
+
+net <- read.delim(network_path, header = TRUE)
 net_filt <- net %>%
   filter(V1 >= 0.8) %>%
   select(gene1 = V3, gene2 = V4, weight = V1)
 
 # --- 2. Load MSigDB and KEGG ---
-msigdb <- read.delim("/scratch/NAR_june_ANUBIX/msigdb/msigdb_v7", header = TRUE)
+msigdb <- read.delim(msigdb_path, header = TRUE)
 KEGG_raw <- read.delim(
-  "/scratch/PathBIX_all/pathbix/data/Rdata/Pathway_databases/ReactomePathways/REACTOME_h_sapiens",
+  reactome_path,
   header = TRUE
 )
 paths <- unique(KEGG_raw$V2)
@@ -76,10 +81,10 @@ for (i in seq_along(paths)) {
   n_ov <- ov_genes[i]
   if (n_ov > 0) {
     if (sample(c(TRUE, FALSE), 1)) {
-      add <- sample(b, n_ov)
+      add <- sample(b, min(n_ov, length(b)))
       a2 <- c(a, add); b2 <- b
     } else {
-      add <- sample(a, n_ov)
+      add <- sample(a, min(n_ov, length(a)))
       b2 <- c(b, add); a2 <- a
     }
   } else {
@@ -90,11 +95,11 @@ for (i in seq_along(paths)) {
 }
 
 # --- 6. Save split sets ---
-write.table(finalA, 
-            file = "/scratch2/Clustering_2022/ReactomeA_overlap",
+write.table(finalA,
+            file = benchmark_output("ReactomeA_overlap"),
             sep = "\t", row.names = FALSE, quote = FALSE)
-write.table(finalB, 
-            file = "/scratch2/Clustering_2022/ReactomeB_overlap",
+write.table(finalB,
+            file = benchmark_output("ReactomeB_overlap"),
             sep = "\t", row.names = FALSE, quote = FALSE)
 
 

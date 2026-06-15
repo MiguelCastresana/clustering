@@ -1,5 +1,6 @@
 
 # Load libraries
+source(file.path("src", "paths.R"))
 library(dplyr)
 library(ANUBIX) 
 
@@ -109,9 +110,9 @@ merge_enrichment_results <- function(annx_res, binox_path = NULL,
 
 # ===== Example Execution =====
 # File paths
-network_path <- "/scratch/2020_clustering/fc4.1"
-pathway_path <- "/scratch/2020_clustering/KEGG_h_sapiens"
-genesets_path <- "/scratch/2020_clustering/FP/FP_genesets"
+network_path <- Sys.getenv("CLUSTERING_NETWORK_FILE", unset = benchmark_file("fc4.1"))
+pathway_path <- Sys.getenv("CLUSTERING_PATHWAYS_FILE", unset = benchmark_file("KEGG_h_sapiens"))
+genesets_path <- Sys.getenv("CLUSTERING_FP_GENESETS_FILE", unset = input_file("FP_genesets"))
 # 4.1 No clustering
 net        <- load_network(network_path)
 paths      <- load_pathways(pathway_path)
@@ -119,18 +120,18 @@ genesets      <- load_genesets(genesets_path)
 no_annx    <- run_anubix_fp(net, paths, genesets)
 no_merged  <- merge_enrichment_results(
   annx_res   = no_annx,
-  binox_path = "/scratch/2020_clustering/benchmark/FP/results/binox_FP_nocluster_biased_50",
-  neat_path  = "/scratch/2020_clustering/benchmark/FP/results/170520FP_neat_nocluster_50.tsv",
-  gea_path   = "/scratch/2020_clustering/benchmark/FP/results/gea_fp_nocluster"
+  binox_path = benchmark_file("benchmark", "FP", "results", "binox_FP_nocluster_biased_50"),
+  neat_path  = benchmark_file("benchmark", "FP", "results", "170520FP_neat_nocluster_50.tsv"),
+  gea_path   = benchmark_file("benchmark", "FP", "results", "gea_fp_nocluster")
 )
-write.table(no_merged, "/scratch/2020_clustering/benchmark/FP/results/all_merge_nocluster_FP_50",
+write.table(no_merged, benchmark_output("benchmark", "FP", "results", "all_merge_nocluster_FP_50"),
             sep = "\t", row.names = FALSE, quote = FALSE)
 
 # 4.2 Clustering methods
 cluster_files <- list(
-  infomap = "/scratch/2020_clustering/benchmark/FP/FINAL_infomap_FP_50_allclusters",
-  mcl     = "/scratch/2020_clustering/benchmark/FP/FINAL_mcl_FP_50_allclusters",
-  mgclus  = "/scratch/2020_clustering/benchmark/FP/FINAL_mgclus_FP_50_allclusters"
+  infomap = benchmark_file("benchmark", "FP", "FINAL_infomap_FP_50_allclusters"),
+  mcl     = benchmark_file("benchmark", "FP", "FINAL_mcl_FP_50_allclusters"),
+  mgclus  = benchmark_file("benchmark", "FP", "FINAL_mgclus_FP_50_allclusters")
 )
 
 for (method in names(cluster_files)) {
@@ -138,10 +139,10 @@ for (method in names(cluster_files)) {
   annx   <- run_anubix_fp(net, paths, gs)
   merged <- merge_enrichment_results(
     annx_res   = annx,
-    binox_path = sprintf("/scratch/2020_clustering/benchmark/FP/results/FINAL_binox_FP_cluster_50_%s", method),
-    neat_path  = sprintf("/scratch/2020_clustering/benchmark/FP/results/280520FINAL_NEAT_FP_cluster_50_%s.tsv", method),
-    gea_path   = sprintf("/scratch/2020_clustering/benchmark/FP/results/FINAL_gea_fp_cluster_50_%s", method)
+    binox_path = benchmark_file("benchmark", "FP", "results", sprintf("FINAL_binox_FP_cluster_50_%s", method)),
+    neat_path  = benchmark_file("benchmark", "FP", "results", sprintf("280520FINAL_NEAT_FP_cluster_50_%s.tsv", method)),
+    gea_path   = benchmark_file("benchmark", "FP", "results", sprintf("FINAL_gea_fp_cluster_50_%s", method))
   )
-  out_file <- sprintf("/scratch/2020_clustering/benchmark/FP/results/FINAL_all_merge_cluster_FP_50_%s", method)
+  out_file <- benchmark_output("benchmark", "FP", "results", sprintf("FINAL_all_merge_cluster_FP_50_%s", method))
   write.table(merged, out_file, sep = "\t", row.names = FALSE, quote = FALSE)
 }

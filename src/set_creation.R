@@ -1,6 +1,7 @@
 
 
 # Load libraries
+source(file.path("src", "paths.R"))
 library(dplyr)
 library(fastmatch)
 library(parallel)
@@ -134,9 +135,9 @@ degree_vs_msigdb <- function(network_file, msigdb_file) {
 }
 
 # ===== Example Execution =====
-# user_paths <- "/scratch/2020_clustering/KEGGB_overlap_2020"
-# user_net   <- "/scratch/2020_clustering/fc4.1"
-# msig_file  <- "/scratch/2020_clustering/msigdb/msigdb_v7"
+user_paths <- Sys.getenv("CLUSTERING_PATHWAYS_FILE", unset = input_file("KEGGB_overlap_2020"))
+user_net <- Sys.getenv("CLUSTERING_NETWORK_FILE", unset = benchmark_file("fc4.1"))
+msig_file <- Sys.getenv("CLUSTERING_MSIGDB_FILE", unset = benchmark_file("msigdb", "msigdb_v7"))
 
 # 1. Load data
 net_data <- load_network(user_net)
@@ -156,16 +157,16 @@ combined_df <- bind_rows(
   geneset_df %>% select(gene, geneset),
   false_df
 )
-write.table(combined_df, "/scratch/2020_clustering/TP/TP_genesets",
+write.table(combined_df, benchmark_output("TP", "TP_genesets"),
             sep = "\t", col.names = TRUE, row.names = FALSE, quote = FALSE)
 
 # 5. Save sub-networks
 save_geneset_networks(net_data$net %>% rename(from = V3, to = V4, score = V1),
-                      combined_df, "/scratch/2020_clustering/benchmark/TP/TP_genesets.RData")
+                      combined_df, benchmark_output("benchmark", "TP", "TP_genesets.RData"))
 
 # 6. Generate biased FPs
 biased_fps <- generate_biased_fps(msig_file,
-                                  "/scratch/2020_clustering/benchmark/FP/FP_genesets")
+                                  benchmark_output("benchmark", "FP", "FP_genesets"))
 
 # 7. Correlation analysis
 corr_value <- degree_vs_msigdb(user_net, msig_file)

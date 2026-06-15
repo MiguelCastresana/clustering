@@ -1,5 +1,6 @@
 
 # Load required libraries
+source(file.path("src", "paths.R"))
 library(dplyr)
 
 # 1. Load a geneset file (FP or cluster output)
@@ -85,13 +86,13 @@ analyze_existing_sets <- function(geneset_df, degree_list) {
 
 # ===== Example Usage =====
 # Define file paths
-fp_path       <- "/scratch/2020_clustering/benchmark/FP/FINAL_FP_50"
-msigdb_path   <- "/scratch/2020_clustering/benchmark/msigdb_v7"
-network_path  <- "/scratch/2020_clustering/benchmark/fc4.1"
+fp_path       <- Sys.getenv("CLUSTERING_FP_GENESETS_FILE", unset = benchmark_file("benchmark", "FP", "FINAL_FP_50"))
+msigdb_path   <- Sys.getenv("CLUSTERING_MSIGDB_FILE", unset = benchmark_file("benchmark", "msigdb_v7"))
+network_path  <- Sys.getenv("CLUSTERING_NETWORK_FILE", unset = benchmark_file("benchmark", "fc4.1"))
 cluster_paths <- list(
-  infomap = "/scratch/2020_clustering/benchmark/FP/FINAL_infomap_FP_50_allclusters",
-  mcl     = "/scratch/2020_clustering/benchmark/FP/FINAL_mcl_FP_50_allclusters",
-  mgclus  = "/scratch/2020_clustering/benchmark/FP/FINAL_mgclus_FP_50_allclusters"
+  infomap = benchmark_file("benchmark", "FP", "FINAL_infomap_FP_50_allclusters"),
+  mcl     = benchmark_file("benchmark", "FP", "FINAL_mcl_FP_50_allclusters"),
+  mgclus  = benchmark_file("benchmark", "FP", "FINAL_mgclus_FP_50_allclusters")
 )
 
 # 1. Load inputs
