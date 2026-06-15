@@ -1,262 +1,128 @@
+# Cluster gene sets with MGclus, MCL, and Infomap.
 
-input_dir = "~/cluster_algorithms/"
-
-
-
-
-# Input (named kegg_kegg)
-load("~/input/input_TP_genesets.RData")
-
-load("~/input/input_TP_genesets.RData")
-
-
-######################################################################################################################
-######################################################################################################################
-###################################################### MGclus ########################################################
-
-
-
-
-
-keggclusters=list()
-j=1
-for(i in 1:length(kegg_kegg)){
-  onekegg=kegg_kegg[[j]]
-  write.table(x=onekegg,paste(input_dir,"onekegg.tsv",sep=""),sep=" ",col.names=FALSE,row.names=FALSE,quote=FALSE)
-  system(paste("java -jar ",input_dir, "mgclusjar.jar  -f " ,input_dir, "onekegg.tsv -w T -o",input_dir, "/onekeggcluster  ",sep=""))
-  
-  # Read in the data
-  x <- scan("~/cluster_algorithms/onekeggcluster", what="", sep="\n")
-  # Separate elements by one or more whitepace
-  y <- strsplit(x, "[[:space:]]+")
-  
-  keggclusters[[j]]=y
-  j=j+1
+args <- commandArgs(trailingOnly = FALSE)
+file_arg <- grep("^--file=", args, value = TRUE)
+project_root <- if (length(file_arg) > 0) {
+  normalizePath(file.path(dirname(sub("^--file=", "", file_arg[1])), ".."), mustWork = TRUE)
+} else {
+  normalizePath(getwd(), mustWork = TRUE)
 }
 
-#Naming each list in the list of pathways
-# names(keggclusters)=names(list_g)
-names(keggclusters)=names(kegg_kegg)
-#Each pathway module number
-groups=vector()
-for (i in 1:length(keggclusters)){
-  nb=length(keggclusters[[i]])
-  groups[i]=nb
+project_file <- function(...) {
+  file.path(project_root, ...)
 }
 
+input_dir <- project_file("cluster_algorithms")
+output_dir <- project_file("results", "clusters")
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
-modules1=data.frame(matrix(NA,nrow=length(unlist(keggclusters)),ncol=2))
-modules1=data.frame(matrix(NA,nrow=0,ncol=2))
-names(modules1)=c("gene","module")
-w=1
-for(i in 1:length(kegg_kegg)){
-  if(groups[i]==0){
-    
-    i=i+0
-  }
-  else{
-    
-    for(k in 1:groups[i]){
-      
-      mod=unlist(keggclusters[[i]][k])
-      mod=as.data.frame(mod)
-      n=nrow(mod)
-      mod1=data.frame(matrix(NA,nrow=n,ncol=2))
-      
-      names(mod1)<-c("gene","module")
-      mod1[,1]=mod
-      
-      nombre = names(kegg_kegg[i])
-      nombre = gsub('([[:punct:]])|\\s+','_',nombre)
-      nombre = gsub("[[:blank:]]", "", nombre)
-      pathgroup=rep(paste("g_",w,"_#",nombre,sep=""),n)
-      pathgroup=trimws(pathgroup, which = "left")
-      # pathgroup <- gsub('([[:punct:]])|\\s+','_',pathgroup)
-      pathgroup <- sapply(pathgroup, toupper)
-      w=w+1
-      pathgroup=as.data.frame(pathgroup)
-      mod1[,2]=pathgroup
-      modules1=rbind(modules1,mod1)
-      
+input_rdata <- project_file("input", "input_TP_genesets.RData")
+if (!file.exists(input_rdata)) {
+  stop("Missing input file: ", input_rdata, call. = FALSE)
+}
+load(input_rdata)
+
+if (!exists("kegg_kegg")) {
+  stop("Expected object `kegg_kegg` in ", input_rdata, call. = FALSE)
+}
+
+write_modules <- function(clusters, source_sets, output_path) {
+  names(clusters) <- names(source_sets)
+  modules <- data.frame(gene = character(), module = character())
+
+  for (i in seq_along(source_sets)) {
+    if (length(clusters[[i]]) == 0) {
+      next
     }
-    
-  }
-  
-  w=1
-}
 
-modules1 =   modules1[modules1[,2] %in% names(which(table(modules1[,2]) > 2)), ]
+    module_index <- 1
+    for (cluster in clusters[[i]]) {
+      genes <- unlist(cluster, use.names = FALSE)
+      if (length(genes) == 0) {
+        next
+      }
 
+      pathway_name <- names(source_sets)[i]
+      pathway_name <- gsub("([[:punct:]])|\\s+", "_", pathway_name)
+      pathway_name <- gsub("[[:blank:]]", "", pathway_name)
+      module_id <- toupper(paste0("g_", module_index, "_#", pathway_name))
 
-
-write.table(modules1,"~/mgclus",sep="\t",col.names=TRUE,row.names=FALSE,quote=FALSE)
-
-
-
-######################################################################################################################
-#######################################################################################################################
-###################################################### MCL ################################################################
-
-
-
-mcl_dir="~/cluster_algorithms/mcl/mcl-14-137/"
-kegg_kegg=kegg_kegg
-# kegg_kegg=list_g
-keggclusters=list()
-j=1
-setwd(paste(mcl_dir,"src/shmcl",sep=""))
-
-
-
-for(i in 1:length(kegg_kegg)){
-  onekegg=kegg_kegg[[i]]
-  write.table(x=onekegg,paste(input_dir,"onekegg.tsv",sep=""),sep=" ",col.names=FALSE,row.names=FALSE,quote=FALSE)
-  system(paste("./mcl ",input_dir,"onekegg.tsv --abc -o ~/cluster_algorithms/onekeggcluster.mcl",sep=""))
-  # Read in the data
-  x <- scan("~/cluster_algorithms/onekeggcluster.mcl", what="", sep="\n")
-  # Separate elements by one or more whitepace
-  y <- strsplit(x, "[[:space:]]+")
-  
-  keggclusters[[j]]=y
-  j=j+1
-  
-  
-}
-
-#Naming each list in the list of pathways
-# names(keggclusters)=names(list_g)
-names(keggclusters)=names(kegg_kegg)
-#Each pathway module number
-groups=vector()
-for (i in 1:length(keggclusters)){
-  nb=length(keggclusters[[i]])
-  groups[i]=nb
-}
-
-
-modules1=data.frame(matrix(NA,nrow=length(unlist(keggclusters)),ncol=2))
-modules1=data.frame(matrix(NA,nrow=0,ncol=2))
-names(modules1)=c("gene","module")
-w=1
-for(i in 1:length(kegg_kegg)){
-  if(groups[i]==0){
-    
-    i=i+0
-  }
-  else{
-    
-    for(k in 1:groups[i]){
-      
-      mod=unlist(keggclusters[[i]][k])
-      mod=as.data.frame(mod)
-      n=nrow(mod)
-      mod1=data.frame(matrix(NA,nrow=n,ncol=2))
-      
-      names(mod1)<-c("gene","module")
-      mod1[,1]=mod
-      
-      nombre = names(kegg_kegg[i])
-      nombre = gsub('([[:punct:]])|\\s+','_',nombre)
-      nombre = gsub("[[:blank:]]", "", nombre)
-      pathgroup=rep(paste("g_",w,"_#",nombre,sep=""),n)
-      pathgroup=trimws(pathgroup, which = "left")
-      # pathgroup <- gsub('([[:punct:]])|\\s+','_',pathgroup)
-      pathgroup <- sapply(pathgroup, toupper)
-      w=w+1
-      pathgroup=as.data.frame(pathgroup)
-      mod1[,2]=pathgroup
-      modules1=rbind(modules1,mod1)
-      
+      modules <- rbind(
+        modules,
+        data.frame(gene = genes, module = module_id, stringsAsFactors = FALSE)
+      )
+      module_index <- module_index + 1
     }
-    
   }
-  
-  w=1
+
+  modules <- modules[modules$module %in% names(which(table(modules$module) > 2)), ]
+  write.table(modules, output_path, sep = "\t", col.names = TRUE, row.names = FALSE, quote = FALSE)
+  invisible(modules)
 }
 
-modules1 =   modules1[modules1[,2] %in% names(which(table(modules1[,2]) > 2)), ]
-
-
-
-write.table(modules1,"~/mcl",sep="\t",col.names=TRUE,row.names=FALSE,quote=FALSE)
-
-
-######################################################################################################################
-#######################################################################################################################
-###################################################### INFOMAP    ################################################################
-
-
-
-library(igraph)
-# INfomap clustering method
-i = 1
-keggclusters=list()
-j=1
-for(i in 1:length(kegg_kegg)){
-  
-  genesetd = graph_from_data_frame(kegg_kegg[[i]][1:2], directed = FALSE, vertices = NULL)
-  prueba = cluster_infomap(genesetd, e.weights = as.vector(unlist(kegg_kegg[[i]][3])))
-  
-  keggclusters[[j]] =  communities(prueba)
-  j = j + 1
-}
-
-
-
-#Naming each list in the list of pathways
-# names(keggclusters)=names(list_g)
-names(keggclusters)=names(kegg_kegg)
-#Each pathway module number
-groups=vector()
-for (i in 1:length(keggclusters)){
-  nb=length(keggclusters[[i]])
-  groups[i]=nb
-}
-
-
-modules1=data.frame(matrix(NA,nrow=length(unlist(keggclusters)),ncol=2))
-modules1=data.frame(matrix(NA,nrow=0,ncol=2))
-names(modules1)=c("gene","module")
-w=1
-for(i in 1:length(kegg_kegg)){
-  if(groups[i]==0){
-    
-    i=i+0
+run_mgclus <- function(source_sets) {
+  mgclus_jar <- project_file("cluster_algorithms", "mgclusjar.jar")
+  if (!file.exists(mgclus_jar)) {
+    stop("Missing MGclus jar: ", mgclus_jar, call. = FALSE)
   }
-  else{
-    
-    for(k in 1:groups[i]){
-      
-      mod=unlist(keggclusters[[i]][k])
-      mod=as.data.frame(mod)
-      n=nrow(mod)
-      mod1=data.frame(matrix(NA,nrow=n,ncol=2))
-      
-      names(mod1)<-c("gene","module")
-      mod1[,1]=mod
-      
-      nombre = names(kegg_kegg[i])
-      nombre = gsub('([[:punct:]])|\\s+','_',nombre)
-      nombre = gsub("[[:blank:]]", "", nombre)
-      pathgroup=rep(paste("g_",w,"_#",nombre,sep=""),n)
-      pathgroup=trimws(pathgroup, which = "left")
-      # pathgroup <- gsub('([[:punct:]])|\\s+','_',pathgroup)
-      pathgroup <- sapply(pathgroup, toupper)
-      w=w+1
-      pathgroup=as.data.frame(pathgroup)
-      mod1[,2]=pathgroup
-      modules1=rbind(modules1,mod1)
-      
+
+  one_kegg_path <- file.path(input_dir, "onekegg.tsv")
+  cluster_path <- file.path(input_dir, "onekeggcluster")
+  clusters <- vector("list", length(source_sets))
+
+  for (i in seq_along(source_sets)) {
+    write.table(source_sets[[i]], one_kegg_path, sep = " ", col.names = FALSE, row.names = FALSE, quote = FALSE)
+    status <- system2(
+      "java",
+      c("-jar", mgclus_jar, "-f", one_kegg_path, "-w", "T", "-o", cluster_path)
+    )
+    if (status != 0) {
+      stop("MGclus failed for gene set index ", i, call. = FALSE)
     }
-    
+    clusters[[i]] <- strsplit(scan(cluster_path, what = "", sep = "\n", quiet = TRUE), "[[:space:]]+")
   }
-  
-  w=1
+
+  write_modules(clusters, source_sets, file.path(output_dir, "mgclus.tsv"))
 }
 
-modules1 =   modules1[modules1[,2] %in% names(which(table(modules1[,2]) > 2)), ]
+run_mcl <- function(source_sets) {
+  mcl_executable <- project_file("cluster_algorithms", "mcl", "mcl-14-137", "src", "shmcl", "mcl")
+  if (!file.exists(mcl_executable)) {
+    stop("Missing MCL executable: ", mcl_executable, call. = FALSE)
+  }
 
+  one_kegg_path <- file.path(input_dir, "onekegg.tsv")
+  cluster_path <- file.path(input_dir, "onekeggcluster.mcl")
+  clusters <- vector("list", length(source_sets))
 
+  for (i in seq_along(source_sets)) {
+    write.table(source_sets[[i]], one_kegg_path, sep = " ", col.names = FALSE, row.names = FALSE, quote = FALSE)
+    status <- system2(mcl_executable, c(one_kegg_path, "--abc", "-o", cluster_path))
+    if (status != 0) {
+      stop("MCL failed for gene set index ", i, call. = FALSE)
+    }
+    clusters[[i]] <- strsplit(scan(cluster_path, what = "", sep = "\n", quiet = TRUE), "[[:space:]]+")
+  }
 
-write.table(modules1,"~/infomap",sep="\t",col.names=TRUE,row.names=FALSE,quote=FALSE)
+  write_modules(clusters, source_sets, file.path(output_dir, "mcl.tsv"))
+}
 
+run_infomap <- function(source_sets) {
+  if (!requireNamespace("igraph", quietly = TRUE)) {
+    stop("The `igraph` package is required for Infomap clustering.", call. = FALSE)
+  }
+
+  clusters <- vector("list", length(source_sets))
+  for (i in seq_along(source_sets)) {
+    graph <- igraph::graph_from_data_frame(source_sets[[i]][, 1:2], directed = FALSE)
+    weights <- if (ncol(source_sets[[i]]) >= 3) as.vector(unlist(source_sets[[i]][, 3])) else NULL
+    communities <- igraph::cluster_infomap(graph, e.weights = weights)
+    clusters[[i]] <- igraph::communities(communities)
+  }
+
+  write_modules(clusters, source_sets, file.path(output_dir, "infomap.tsv"))
+}
+
+run_mgclus(kegg_kegg)
+run_mcl(kegg_kegg)
+run_infomap(kegg_kegg)

@@ -4,7 +4,15 @@ library(cowplot)
 
 # ----------------------------------------------------------------------------- 
 ## CONFIG
-base_dir <- "~/FINAL RESULTS"
+args <- commandArgs(trailingOnly = FALSE)
+file_arg <- grep("^--file=", args, value = TRUE)
+project_root <- if (length(file_arg) > 0) {
+  normalizePath(file.path(dirname(sub("^--file=", "", file_arg[1])), ".."), mustWork = TRUE)
+} else {
+  normalizePath(getwd(), mustWork = TRUE)
+}
+
+base_dir <- file.path(project_root, "results")
 
 tp_files <- list(
   cluster    = file.path(base_dir, "INFOMAP_allresults_TP"),
@@ -29,8 +37,8 @@ tp_pathway_ids <- tp_pathway_df$Geneset |>
   sapply(`[`, 2) |>
   strsplit("_") |>
   unlist() |>
-  unique() |>
-  .[grepl("^HSA\\d{5}$", .)]
+  unique()
+tp_pathway_ids <- tp_pathway_ids[grepl("^HSA\\d{5}$", tp_pathway_ids)]
 
 # Load FP data
 fp_pathway_df <- read.delim(fp_files$cluster, header = FALSE, stringsAsFactors = FALSE)
@@ -43,8 +51,8 @@ n_true_negatives   <- length(unique(fp_pathway_df$Geneset)) * length(unique(fp_p
 
 # ==================== GENERIC HELPERS ========================================
 read_metrics <- function(path, keep_cols) {
-  read_delim(path, delim = "\t", show_col_types = FALSE) %>% 
-    select(all_of(keep_cols))
+  data <- read_delim(path, delim = "\t", show_col_types = FALSE)
+  data[, keep_cols, drop = FALSE]
 }
 
 melt_pvals <- function(df, cols, tp_flag) {

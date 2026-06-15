@@ -1,0 +1,30 @@
+# R session and project files
+.Rhistory
+.RData
+.Rproj.user/
+.Ruserdata
+
+# Local environments and caches
+.Rlib/
+renv/library/
+.ipynb_checkpoints/
+__pycache__/
+
+# Generated clustering outputs
+results/clusters/
+cluster_algorithms/onekegg.tsv
+cluster_algorithms/onekeggcluster
+cluster_algorithms/onekeggcluster.mcl
+
+# Build artifacts from local MCL compilation
+*.o
+*.so
+*.a
+config.log
+config.status
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
